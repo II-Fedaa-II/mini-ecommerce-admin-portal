@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { PERMISSIONS } from '@/features/auth/types';
-import { ApiError } from '@/shared/api/httpClient';
 import { Button } from '@/shared/components/ui/button';
+import { useToast } from '@/shared/components/ui/toast';
+import { errorMessage } from '@/shared/lib/errorMessage';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/ui/states';
 import { formatPrice } from '@/shared/lib/utils';
 import { ProductForm } from '../components/ProductForm';
@@ -14,28 +15,33 @@ export function ProductsPage() {
   const { products, isLoading, isError, refetch, createProduct, updateProduct, deleteProduct } = useProducts();
 
   const [editing, setEditing] = useState<Product | 'new' | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   const canWrite = can(PERMISSIONS.PRODUCTS_WRITE);
   const canDelete = can(PERMISSIONS.PRODUCTS_DELETE);
 
   async function handleSubmit(input: ProductInput) {
-    setError(null);
     try {
-      if (editing === 'new') await createProduct.mutateAsync(input);
-      else if (editing) await updateProduct.mutateAsync({ id: editing.id, input });
+      if (editing === 'new') {
+        await createProduct.mutateAsync(input);
+        toast.success(`${input.title} created.`);
+      } else if (editing) {
+        await updateProduct.mutateAsync({ id: editing.id, input });
+        toast.success(`${input.title} updated.`);
+      }
       setEditing(null);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not save the product.');
+      // A duplicate title comes back as a 409 with a precise message — show it.
+      toast.error(errorMessage(err, 'Could not save the product.'));
     }
   }
 
   async function handleDelete(product: Product) {
-    setError(null);
     try {
       await deleteProduct.mutateAsync(product.id);
+      toast.success(`${product.title} deleted.`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not delete the product.');
+      toast.error(errorMessage(err, 'Could not delete the product.'));
     }
   }
 
@@ -52,11 +58,6 @@ export function ProductsPage() {
         {canWrite && !editing && <Button onClick={() => setEditing('new')}>New product</Button>}
       </header>
 
-      {error && (
-        <p className="mb-6 border border-line bg-surface px-3 py-2 text-sm text-danger" role="alert">
-          {error}
-        </p>
-      )}
 
       {editing && (
         <div className="mb-8">

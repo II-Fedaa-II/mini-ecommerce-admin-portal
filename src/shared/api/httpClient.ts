@@ -15,6 +15,8 @@ export class ApiError extends Error {
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: unknown;
+  /** Extra headers, e.g. `Idempotency-Key` on checkout. */
+  headers?: Record<string, string>;
   /** Internal: prevents a refreshed request from recursing if the retry also 401s. */
   skipRefresh?: boolean;
 }
@@ -46,7 +48,7 @@ async function refreshAccessToken(): Promise<boolean> {
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, skipRefresh = false } = options;
+  const { method = 'GET', body, headers = {}, skipRefresh = false } = options;
   const token = tokenStore.get();
 
   const response = await fetch(`${API_URL}${path}`, {
@@ -55,6 +57,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     headers: {
       ...(body ? { 'Content-Type': 'application/json' } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...headers,
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });

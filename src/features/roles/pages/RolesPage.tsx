@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { ApiError } from '@/shared/api/httpClient';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
+import { useToast } from '@/shared/components/ui/toast';
+import { errorMessage } from '@/shared/lib/errorMessage';
 import { ErrorState, LoadingState } from '@/shared/components/ui/states';
 import { PermissionPicker } from '../components/PermissionPicker';
 import { useRoles } from '../hooks/useRoles';
@@ -15,40 +16,41 @@ export function RolesPage() {
   const [newRoleName, setNewRoleName] = useState('');
   const [newRolePermissions, setNewRolePermissions] = useState<string[]>([]);
   const [drafts, setDrafts] = useState<Record<string, string[]>>({});
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   async function handleCreate(event: FormEvent) {
     event.preventDefault();
-    setError(null);
+    const name = newRoleName.trim();
     try {
-      await createRole.mutateAsync({ name: newRoleName.trim(), permissions: newRolePermissions });
+      await createRole.mutateAsync({ name, permissions: newRolePermissions });
+      toast.success(`Role "${name}" created.`);
       setNewRoleName('');
       setNewRolePermissions([]);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not create the role.');
+      toast.error(errorMessage(err, 'Could not create the role.'));
     }
   }
 
   async function handleSave(id: string, permissions: string[]) {
-    setError(null);
     try {
       await updateRole.mutateAsync({ id, permissions });
+      toast.success('Permissions updated.');
       setDrafts((current) => {
         const next = { ...current };
         delete next[id];
         return next;
       });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not update the role.');
+      toast.error(errorMessage(err, 'Could not update the role.'));
     }
   }
 
   async function handleDelete(id: string) {
-    setError(null);
     try {
       await deleteRole.mutateAsync(id);
+      toast.success('Role deleted.');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not delete the role.');
+      toast.error(errorMessage(err, 'Could not delete the role.'));
     }
   }
 
@@ -61,11 +63,6 @@ export function RolesPage() {
         </p>
       </header>
 
-      {error && (
-        <p className="mb-6 border border-line bg-surface px-3 py-2 text-sm text-danger" role="alert">
-          {error}
-        </p>
-      )}
 
       {isAdmin && (
         <form className="mb-8 flex flex-col gap-4 border border-line bg-surface p-6" onSubmit={handleCreate}>

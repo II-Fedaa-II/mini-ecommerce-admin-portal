@@ -1,25 +1,25 @@
-import { useState } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { PERMISSIONS } from '@/features/auth/types';
 import { useRoles } from '@/features/roles/hooks/useRoles';
-import { ApiError } from '@/shared/api/httpClient';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/ui/states';
+import { useToast } from '@/shared/components/ui/toast';
+import { errorMessage } from '@/shared/lib/errorMessage';
 import { useUsers } from '../hooks/useUsers';
 
 export function UsersPage() {
   const { can, user: currentUser } = useAuth();
   const { users, isLoading, isError, refetch, assignRole } = useUsers();
   const { roles } = useRoles();
-  const [error, setError] = useState<string | null>(null);
+  const toast = useToast();
 
   const canAssign = can(PERMISSIONS.USERS_ASSIGN_ROLE);
 
-  async function handleAssign(userId: string, roleId: string) {
-    setError(null);
+  async function handleAssign(user: { id: string; name: string }, roleId: string) {
     try {
-      await assignRole.mutateAsync({ userId, roleId });
+      const updated = await assignRole.mutateAsync({ userId: user.id, roleId });
+      toast.success(`${user.name} is now ${updated.role?.name ?? 'updated'}.`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not change that role.');
+      toast.error(errorMessage(err, 'Could not change that role.'));
     }
   }
 
@@ -30,11 +30,6 @@ export function UsersPage() {
         <p className="mt-2 text-ink-soft">Assign each account the role that matches what they should do.</p>
       </header>
 
-      {error && (
-        <p className="mb-6 border border-line bg-surface px-3 py-2 text-sm text-danger" role="alert">
-          {error}
-        </p>
-      )}
 
       {isLoading && <LoadingState label="Loading users" />}
       {isError && <ErrorState message="We couldn't load the users." onRetry={() => void refetch()} />}
@@ -68,7 +63,7 @@ export function UsersPage() {
                           aria-label={`Role for ${user.name}`}
                           value={user.role?.id ?? ''}
                           disabled={assignRole.isPending}
-                          onChange={(e) => void handleAssign(user.id, e.target.value)}
+                          onChange={(e) => void handleAssign(user, e.target.value)}
                           className="h-9 border border-line bg-surface px-2 text-sm text-ink focus:border-accent focus:outline-none"
                         >
                           {roles.map((role) => (
