@@ -71,7 +71,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         the user just operated. Errors are assertive; successes stay polite.
       */}
       <div
-        className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex flex-col items-center gap-2 p-4 sm:items-end"
+        className="pointer-events-none fixed top-0 right-0 z-50 flex flex-col items-end gap-2 p-4"
         role="region"
         aria-label="Notifications"
       >
