@@ -20,6 +20,14 @@ export const mockUsers: AdminUser[] = [
 
 export const userHandlers = [
   http.get(`${API_URL}/users`, () => HttpResponse.json(mockUsers)),
+  http.post(`${API_URL}/users`, async ({ request }) => {
+    const body = (await request.json()) as { email: string; name: string; roleId: string };
+    const role = mockRoles.find((entry) => entry.id === body.roleId) ?? null;
+    return HttpResponse.json(
+      { id: 'user-new', email: body.email, name: body.name, role },
+      { status: 201 },
+    );
+  }),
   http.patch(`${API_URL}/users/:id/role`, async ({ request, params }) => {
     const body = (await request.json()) as { roleId: string };
     const role = mockRoles.find((entry) => entry.id === body.roleId) ?? null;

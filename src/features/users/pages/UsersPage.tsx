@@ -1,18 +1,26 @@
+import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { PERMISSIONS } from '@/features/auth/types';
 import { useRoles } from '@/features/roles/hooks/useRoles';
+import { Button } from '@/shared/components/ui/button';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/ui/states';
 import { useToast } from '@/shared/components/ui/toast';
 import { errorMessage } from '@/shared/lib/errorMessage';
+import { CreateUserDialog } from '../components/CreateUserDialog';
 import { useUsers } from '../hooks/useUsers';
+import type { CreateUserInput } from '../types';
 
 export function UsersPage() {
   const { can, user: currentUser } = useAuth();
-  const { users, isLoading, isError, error, refetch, assignRole } = useUsers();
+  const { users, isLoading, isError, error, refetch, assignRole, createUser } = useUsers();
   const { roles } = useRoles();
   const toast = useToast();
 
+  const [isCreating, setIsCreating] = useState(false);
+
   const canAssign = can(PERMISSIONS.USERS_ASSIGN_ROLE);
+  const canCreate = can(PERMISSIONS.USERS_WRITE);
 
   async function handleAssign(user: { id: string; name: string }, roleId: string) {
     try {
@@ -23,11 +31,30 @@ export function UsersPage() {
     }
   }
 
+  async function handleCreate(input: CreateUserInput) {
+    try {
+      const created = await createUser.mutateAsync(input);
+      toast.success(`${created.name} was created.`);
+      setIsCreating(false);
+    } catch (err) {
+      toast.error(errorMessage(err, 'Could not create that user.'));
+    }
+  }
+
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
-      <header className="mb-8 border-b-2 border-ink pb-6">
-        <h1 className="display text-5xl">Users</h1>
-        <p className="mt-2 text-sm text-ink-soft">Assign each account the role that matches what they should do.</p>
+      <header className="mb-8 flex items-end justify-between gap-4 border-b-2 border-ink pb-6">
+        <div>
+          <h1 className="display text-5xl">Users</h1>
+          <p className="mt-2 text-sm text-ink-soft">Assign each account the role that matches what they should do.</p>
+        </div>
+
+        {canCreate && (
+          <Button onClick={() => setIsCreating(true)}>
+            <Plus className="h-4 w-4" aria-hidden strokeWidth={3} />
+            New user
+          </Button>
+        )}
       </header>
 
       {isLoading && <LoadingState label="Loading users" />}
@@ -84,6 +111,14 @@ export function UsersPage() {
           </table>
         </div>
       )}
+
+      <CreateUserDialog
+        open={isCreating}
+        onOpenChange={setIsCreating}
+        roles={roles ?? []}
+        isSubmitting={createUser.isPending}
+        onSubmit={(input) => void handleCreate(input)}
+      />
     </main>
   );
 }

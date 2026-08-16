@@ -20,6 +20,11 @@ export function useUsers() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: userKeys.all }),
   });
 
+  const createUser = useMutation({
+    mutationFn: usersApi.create,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: userKeys.all }),
+  });
+
   return {
     users: query.data,
     isLoading: query.isLoading,
@@ -27,5 +32,6 @@ export function useUsers() {
     error: query.error,
     refetch: query.refetch,
     assignRole,
+    createUser,
   };
 }
