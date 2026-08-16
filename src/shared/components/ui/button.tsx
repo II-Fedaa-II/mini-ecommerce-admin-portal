@@ -4,19 +4,28 @@ import type { ButtonHTMLAttributes } from 'react';
 import { cn } from '@/shared/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium transition-colors disabled:pointer-events-none disabled:opacity-50',
+  [
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap',
+    'font-semibold uppercase tracking-[0.06em]',
+    'transition-[transform,background-color,color] duration-150 ease-out',
+    'active:translate-y-px',
+    'disabled:pointer-events-none disabled:opacity-40',
+  ].join(' '),
   {
     variants: {
       variant: {
-        primary: 'bg-accent text-white hover:bg-accent-hover',
-        outline: 'border border-line bg-surface text-ink hover:bg-canvas',
-        ghost: 'text-ink-soft hover:bg-canvas hover:text-ink',
-        danger: 'border border-line bg-surface text-danger hover:bg-canvas',
+        // Solid ink slab: the primary action reads as a stamped block.
+        primary: 'bg-ink text-paper hover:bg-accent hover:text-white',
+        accent: 'bg-accent text-white hover:bg-ink',
+        outline: 'border-2 border-ink bg-transparent text-ink hover:bg-ink hover:text-paper',
+        ghost: 'text-ink-soft hover:text-ink',
+        danger: 'border-2 border-danger bg-transparent text-danger hover:bg-danger hover:text-paper',
       },
       size: {
-        sm: 'h-9 px-3 text-sm',
-        md: 'h-11 px-5 text-base',
-        icon: 'h-9 w-9',
+        sm: 'h-9 px-3 text-[11px]',
+        md: 'h-12 px-6 text-xs',
+        lg: 'h-14 px-8 text-sm',
+        icon: 'h-10 w-10',
       },
     },
     defaultVariants: { variant: 'primary', size: 'md' },

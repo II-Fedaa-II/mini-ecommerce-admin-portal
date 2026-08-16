@@ -81,22 +81,25 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             role={toast.tone === 'error' ? 'alert' : 'status'}
             aria-live={toast.tone === 'error' ? 'assertive' : 'polite'}
             className={cn(
-              'pointer-events-auto flex w-full max-w-sm items-start gap-3 border bg-surface px-4 py-3 shadow-sm',
-              toast.tone === 'error' ? 'border-danger' : 'border-success',
+              'pointer-events-auto flex w-full max-w-sm items-start gap-3 border-2 px-4 py-3',
+              'shadow-[0_10px_24px_-12px_rgba(17,19,24,0.6)]',
+              toast.tone === 'error'
+                ? 'border-danger bg-surface'
+                : 'border-ink bg-success-soft',
             )}
           >
             {toast.tone === 'error' ? (
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden />
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-danger" aria-hidden strokeWidth={2.5} />
             ) : (
-              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden />
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden strokeWidth={2.5} />
             )}
 
-            <p className="flex-1 text-sm text-ink">{toast.message}</p>
+            <p className="flex-1 text-sm font-medium text-ink">{toast.message}</p>
 
             <button
               onClick={() => dismiss(toast.id)}
               aria-label="Dismiss notification"
-              className="text-ink-muted transition-colors hover:text-ink"
+              className="shrink-0 text-ink/50 transition-colors hover:text-ink"
             >
               <X className="h-4 w-4" aria-hidden />
             </button>

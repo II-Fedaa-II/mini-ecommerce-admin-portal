@@ -23,10 +23,10 @@ export function Sidebar() {
   const visibleItems = NAV_ITEMS.filter((item) => !item.permission || can(item.permission));
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-line bg-surface">
-      <div className="border-b border-line px-6 py-5">
-        <p className="text-xs tracking-wide text-ink-muted uppercase">Control panel</p>
-        <p className="mt-1 text-lg tracking-tight">Mini E-Commerce</p>
+    <aside className="flex w-64 shrink-0 flex-col border-r-2 border-ink bg-surface">
+      <div className="border-b-2 border-ink bg-ink px-6 py-6">
+        <p className="text-[11px] font-bold tracking-[0.14em] text-white/60 uppercase">Control panel</p>
+        <p className="display mt-1 text-2xl text-white">Mini E-Commerce</p>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 p-3">
@@ -36,28 +36,30 @@ export function Sidebar() {
             to={to}
             className={({ isActive }) =>
               cn(
-                'flex items-center gap-3 px-3 py-2 text-sm transition-colors',
-                isActive ? 'bg-canvas text-ink' : 'text-ink-soft hover:bg-canvas hover:text-ink',
+                'flex items-center gap-3 border-2 border-transparent px-3 py-2.5 text-sm font-semibold uppercase tracking-[0.04em] transition-colors',
+                isActive
+                  ? 'border-ink bg-accent text-white'
+                  : 'text-ink-soft hover:border-line hover:bg-paper hover:text-ink',
               )
             }
           >
-            <Icon className="h-4 w-4" aria-hidden />
+            <Icon className="h-4 w-4" aria-hidden strokeWidth={2.5} />
             {label}
           </NavLink>
         ))}
       </nav>
 
-      <div className="border-t border-line p-3">
+      <div className="border-t-2 border-ink p-3">
         <div className="px-3 py-2">
-          <p className="text-sm">{user?.name}</p>
+          <p className="text-sm font-semibold">{user?.name}</p>
           <p className="text-xs text-ink-muted">{user?.role?.name ?? 'no role'}</p>
         </div>
 
         <button
-          className="flex w-full items-center gap-3 px-3 py-2 text-sm text-ink-soft transition-colors hover:bg-canvas hover:text-ink"
+          className="flex w-full items-center gap-3 px-3 py-2 text-sm font-semibold text-ink-soft uppercase tracking-[0.04em] transition-colors hover:bg-danger-soft hover:text-danger"
           onClick={() => void handleLogout()}
         >
-          <LogOut className="h-4 w-4" aria-hidden />
+          <LogOut className="h-4 w-4" aria-hidden strokeWidth={2.5} />
           Sign out
         </button>
       </div>

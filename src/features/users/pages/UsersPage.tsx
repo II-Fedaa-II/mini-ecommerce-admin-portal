@@ -25,11 +25,10 @@ export function UsersPage() {
 
   return (
     <main className="mx-auto max-w-5xl px-6 py-12">
-      <header className="mb-8">
-        <h1 className="text-3xl tracking-tight">Users</h1>
-        <p className="mt-2 text-ink-soft">Assign each account the role that matches what they should do.</p>
+      <header className="mb-8 border-b-2 border-ink pb-6">
+        <h1 className="display text-5xl">Users</h1>
+        <p className="mt-2 text-sm text-ink-soft">Assign each account the role that matches what they should do.</p>
       </header>
-
 
       {isLoading && <LoadingState label="Loading users" />}
       {isError && <ErrorState message="We couldn't load the users." onRetry={() => void refetch()} />}
@@ -37,13 +36,13 @@ export function UsersPage() {
       {users && users.length === 0 && <EmptyState title="No users yet" />}
 
       {users && users.length > 0 && (
-        <div className="overflow-x-auto border border-line bg-surface">
+        <div className="overflow-x-auto border-2 border-ink bg-surface">
           <table className="w-full text-left">
-            <thead className="border-b border-line text-sm text-ink-soft">
+            <thead className="border-b-2 border-ink bg-paper text-[11px] font-bold tracking-[0.1em] text-ink-soft uppercase">
               <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Email</th>
-                <th className="px-4 py-3 font-medium">Role</th>
+                <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Role</th>
               </tr>
             </thead>
             <tbody>
@@ -51,10 +50,10 @@ export function UsersPage() {
                 const isSelf = user.id === currentUser?.id;
 
                 return (
-                  <tr key={user.id} className="border-b border-line last:border-b-0">
-                    <td className="px-4 py-3">
+                  <tr key={user.id} className="border-b-2 border-line last:border-b-0">
+                    <td className="px-4 py-3 font-semibold">
                       {user.name}
-                      {isSelf && <span className="ml-2 text-xs text-ink-muted">(you)</span>}
+                      {isSelf && <span className="ml-2 text-xs font-normal text-ink-muted">(you)</span>}
                     </td>
                     <td className="px-4 py-3 text-ink-soft">{user.email}</td>
                     <td className="px-4 py-3">
@@ -64,7 +63,7 @@ export function UsersPage() {
                           value={user.role?.id ?? ''}
                           disabled={assignRole.isPending}
                           onChange={(e) => void handleAssign(user, e.target.value)}
-                          className="h-9 border border-line bg-surface px-2 text-sm text-ink focus:border-accent focus:outline-none"
+                          className="h-10 border-2 border-ink bg-surface px-2 text-sm text-ink focus:outline-none focus:ring-4 focus:ring-accent/40"
                         >
                           {roles.map((role) => (
                             <option key={role.id} value={role.id}>
