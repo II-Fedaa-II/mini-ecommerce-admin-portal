@@ -11,3 +11,18 @@ export interface CreateUserInput {
   name: string;
   roleId: string;
 }
+
+export interface ListUsersQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  roleId?: string;
+}
+
+export interface PaginatedUsers {
+  items: AdminUser[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}

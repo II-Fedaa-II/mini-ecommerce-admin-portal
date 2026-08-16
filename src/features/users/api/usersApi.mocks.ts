@@ -19,7 +19,15 @@ export const mockUsers: AdminUser[] = [
 ];
 
 export const userHandlers = [
-  http.get(`${API_URL}/users`, () => HttpResponse.json(mockUsers)),
+  http.get(`${API_URL}/users`, () =>
+    HttpResponse.json({
+      items: mockUsers,
+      total: mockUsers.length,
+      page: 1,
+      limit: mockUsers.length,
+      totalPages: 1,
+    }),
+  ),
   http.post(`${API_URL}/users`, async ({ request }) => {
     const body = (await request.json()) as { email: string; name: string; roleId: string };
     const role = mockRoles.find((entry) => entry.id === body.roleId) ?? null;
