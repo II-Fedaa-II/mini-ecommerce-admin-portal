@@ -88,15 +88,37 @@ test('admin golden path: sign in, manage a product, then create and assign a rol
   const adminSection = page.locator('section').filter({ hasText: 'Built-in role' }).first();
   await expect(adminSection).toBeVisible();
 
-  // Assign the new role to a user.
+  // Create a dedicated throwaway user for the reassignment step below — never touch
+  // the shared Demo Customer account, which the client-portal e2e suite also signs in
+  // as and depends on holding its normal customer permissions.
   await page.getByRole('link', { name: 'Users' }).click();
   await expect(page.getByRole('heading', { name: 'Users' })).toBeVisible();
 
-  const roleSelect = page.getByLabel('Role for Demo Customer');
+  // Named uniquely per run, not just "E2E Assignee" — there is no delete-user endpoint
+  // yet, so fixture rows from earlier runs accumulate, and a name shared across runs
+  // would make the row locator below ambiguous once two or more exist at once.
+  const assigneeEmail = `e2e-assignee-${Date.now()}@test.com`;
+  const assigneeName = `E2E Assignee ${Date.now()}`;
+
+  await page.getByRole('button', { name: 'New user' }).click();
+  const createUserDialog = page.getByRole('dialog');
+  await createUserDialog.getByLabel('Name').fill(assigneeName);
+  await createUserDialog.getByLabel('Email').fill(assigneeEmail);
+  await createUserDialog.getByLabel('Password').fill('Password123!');
+  await createUserDialog.getByRole('button', { name: 'Create user' }).click();
+  await expect(createUserDialog).not.toBeVisible();
+
+  // Search rather than assume page 1 — the users table accumulates fixtures across runs.
+  await page.getByLabel('Search users by name or email').fill(assigneeEmail);
+  const assigneeRow = page.getByRole('row', { name: new RegExp(assigneeEmail) });
+  await expect(assigneeRow).toBeVisible();
+
+  const roleSelect = assigneeRow.getByLabel(/Role for/);
   await roleSelect.selectOption({ label: ROLE_NAME });
   await expect(roleSelect).toHaveValue(/.+/);
 
   // Reload to prove the change persisted server-side, not just in local state.
   await page.reload();
-  await expect(page.getByLabel('Role for Demo Customer')).toContainText(ROLE_NAME);
+  await page.getByLabel('Search users by name or email').fill(assigneeEmail);
+  await expect(assigneeRow.getByLabel(/Role for/)).toContainText(ROLE_NAME);
 });
