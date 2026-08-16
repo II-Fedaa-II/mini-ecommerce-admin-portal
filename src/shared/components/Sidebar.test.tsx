@@ -28,6 +28,7 @@ describe('Sidebar', () => {
     await signInAs('admin@mini-ecommerce.test');
 
     await waitFor(() => expect(screen.getByRole('link', { name: /Products/ })).toBeInTheDocument());
+    expect(screen.getByRole('link', { name: /Orders/ })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Roles/ })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /Users/ })).toBeInTheDocument();
   });
@@ -37,6 +38,7 @@ describe('Sidebar', () => {
 
     await waitFor(() => expect(screen.getByRole('link', { name: /Products/ })).toBeInTheDocument());
     // The catalogue editor holds only product permissions.
+    expect(screen.queryByRole('link', { name: /Orders/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Roles/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('link', { name: /Users/ })).not.toBeInTheDocument();
   });

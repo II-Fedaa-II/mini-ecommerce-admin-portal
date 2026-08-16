@@ -1,4 +1,4 @@
-import { LogOut, Package, ShieldCheck, Users } from 'lucide-react';
+import { LogOut, Package, Receipt, ShieldCheck, Users } from 'lucide-react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { PERMISSIONS, type Permission } from '@/features/auth/types';
@@ -6,6 +6,7 @@ import { cn } from '@/shared/lib/utils';
 
 const NAV_ITEMS: { to: string; label: string; icon: typeof Package; permission?: Permission }[] = [
   { to: '/products', label: 'Products', icon: Package },
+  { to: '/orders', label: 'Orders', icon: Receipt, permission: PERMISSIONS.ORDERS_READ },
   { to: '/roles', label: 'Roles', icon: ShieldCheck, permission: PERMISSIONS.ROLES_MANAGE },
   { to: '/users', label: 'Users', icon: Users, permission: PERMISSIONS.USERS_READ },
 ];
