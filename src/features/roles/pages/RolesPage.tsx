@@ -13,7 +13,7 @@ import type { Role } from '../types';
 
 export function RolesPage() {
   const { isAdmin } = useAuth();
-  const { roles, availablePermissions, isLoading, isError, refetch, createRole, updateRole, deleteRole } =
+  const { roles, availablePermissions, isLoading, isError, error, refetch, createRole, updateRole, deleteRole } =
     useRoles();
 
   const [isCreating, setIsCreating] = useState(false);
@@ -86,7 +86,9 @@ export function RolesPage() {
       </header>
 
       {isLoading && <LoadingState label="Loading roles" />}
-      {isError && <ErrorState message="We couldn't load the roles." onRetry={() => void refetch()} />}
+      {isError && (
+        <ErrorState message={errorMessage(error, "We couldn't load the roles.")} onRetry={() => void refetch()} />
+      )}
 
       <div className="flex flex-col gap-4">
         {roles?.map((role) => (

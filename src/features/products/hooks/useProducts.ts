@@ -36,6 +36,7 @@ export function useProducts(query: ProductListQuery = {}) {
     data: productsQuery.data,
     isLoading: productsQuery.isLoading,
     isError: productsQuery.isError,
+    error: productsQuery.error,
     isPlaceholderData: productsQuery.isPlaceholderData,
     refetch: productsQuery.refetch,
     createProduct,

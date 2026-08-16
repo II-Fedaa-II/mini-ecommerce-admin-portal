@@ -23,6 +23,7 @@ export function useOrders(query: ListOrdersQuery = {}) {
     data: ordersQuery.data,
     isLoading: ordersQuery.isLoading,
     isError: ordersQuery.isError,
+    error: ordersQuery.error,
     isPlaceholderData: ordersQuery.isPlaceholderData,
     refetch: ordersQuery.refetch,
   };

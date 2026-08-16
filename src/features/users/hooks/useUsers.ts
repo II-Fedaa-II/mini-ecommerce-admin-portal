@@ -24,6 +24,7 @@ export function useUsers() {
     users: query.data,
     isLoading: query.isLoading,
     isError: query.isError,
+    error: query.error,
     refetch: query.refetch,
     assignRole,
   };

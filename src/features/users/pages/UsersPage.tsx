@@ -8,7 +8,7 @@ import { useUsers } from '../hooks/useUsers';
 
 export function UsersPage() {
   const { can, user: currentUser } = useAuth();
-  const { users, isLoading, isError, refetch, assignRole } = useUsers();
+  const { users, isLoading, isError, error, refetch, assignRole } = useUsers();
   const { roles } = useRoles();
   const toast = useToast();
 
@@ -31,7 +31,9 @@ export function UsersPage() {
       </header>
 
       {isLoading && <LoadingState label="Loading users" />}
-      {isError && <ErrorState message="We couldn't load the users." onRetry={() => void refetch()} />}
+      {isError && (
+        <ErrorState message={errorMessage(error, "We couldn't load the users.")} onRetry={() => void refetch()} />
+      )}
 
       {users && users.length === 0 && <EmptyState title="No users yet" />}
 

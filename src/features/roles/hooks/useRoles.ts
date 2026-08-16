@@ -43,6 +43,7 @@ export function useRoles() {
     availablePermissions: permissionsQuery.data?.permissions ?? [],
     isLoading: rolesQuery.isLoading,
     isError: rolesQuery.isError,
+    error: rolesQuery.error,
     refetch: rolesQuery.refetch,
     createRole,
     updateRole,

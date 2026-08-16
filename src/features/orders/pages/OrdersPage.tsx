@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Input } from '@/shared/components/ui/input';
 import { Pagination } from '@/shared/components/ui/Pagination';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/ui/states';
+import { errorMessage } from '@/shared/lib/errorMessage';
 import { formatPrice } from '@/shared/lib/utils';
 import { OrderDetailsDialog } from '../components/OrderDetailsDialog';
 import { useOrders } from '../hooks/useOrders';
@@ -32,7 +33,7 @@ export function OrdersPage() {
     [page, search],
   );
 
-  const { data, isLoading, isError, isPlaceholderData, refetch } = useOrders(query);
+  const { data, isLoading, isError, error, isPlaceholderData, refetch } = useOrders(query);
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-12">
@@ -73,7 +74,9 @@ export function OrdersPage() {
       </div>
 
       {isLoading && <LoadingState label="Loading orders" />}
-      {isError && <ErrorState message="We couldn't load the orders." onRetry={() => void refetch()} />}
+      {isError && (
+        <ErrorState message={errorMessage(error, "We couldn't load the orders.")} onRetry={() => void refetch()} />
+      )}
 
       {data && data.items.length === 0 && (
         <EmptyState

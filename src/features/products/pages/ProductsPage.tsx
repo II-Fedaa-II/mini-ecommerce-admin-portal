@@ -45,6 +45,7 @@ export function ProductsPage() {
     data,
     isLoading,
     isError,
+    error,
     isPlaceholderData,
     refetch,
     createProduct,
@@ -143,7 +144,12 @@ export function ProductsPage() {
       />
 
       {isLoading && <LoadingState label="Loading products" />}
-      {isError && <ErrorState message="We couldn't load the catalogue." onRetry={() => void refetch()} />}
+      {isError && (
+        <ErrorState
+          message={errorMessage(error, "We couldn't load the catalogue.")}
+          onRetry={() => void refetch()}
+        />
+      )}
 
       {data && data.items.length === 0 && (
         <EmptyState
