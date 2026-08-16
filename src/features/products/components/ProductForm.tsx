@@ -1,11 +1,14 @@
 import { useState, type FormEvent } from 'react';
 import { Button } from '@/shared/components/ui/button';
-import { Input } from '@/shared/components/ui/input';
+import { FieldLabel, Input, Textarea } from '@/shared/components/ui/input';
+import { ImageUploader } from './ImageUploader';
 import type { Product, ProductInput, ProductVariant } from '../types';
 
 interface ProductFormProps {
   initialProduct?: Product;
   isSubmitting: boolean;
+  isUploading: boolean;
+  onUpload: (file: File) => Promise<{ imageUrl: string }>;
   onSubmit: (input: ProductInput) => void;
   onCancel: () => void;
 }
@@ -33,12 +36,20 @@ function parseVariants(text: string): ProductVariant[] {
     .filter((variant) => variant.name && variant.options.length > 0);
 }
 
-export function ProductForm({ initialProduct, isSubmitting, onSubmit, onCancel }: ProductFormProps) {
+export function ProductForm({
+  initialProduct,
+  isSubmitting,
+  isUploading,
+  onUpload,
+  onSubmit,
+  onCancel,
+}: ProductFormProps) {
   const [title, setTitle] = useState(initialProduct?.title ?? '');
   const [description, setDescription] = useState(initialProduct?.description ?? '');
   const [price, setPrice] = useState(String(initialProduct?.price ?? ''));
   const [stock, setStock] = useState(String(initialProduct?.stock ?? ''));
   const [variantsText, setVariantsText] = useState(variantsToText(initialProduct?.variants ?? []));
+  const [imageUrl, setImageUrl] = useState<string | null>(initialProduct?.imageUrl ?? null);
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -48,39 +59,42 @@ export function ProductForm({ initialProduct, isSubmitting, onSubmit, onCancel }
       price: Number(price),
       stock: Number(stock),
       variants: parseVariants(variantsText),
+      imageUrl,
     });
   }
 
   return (
-    <form className="flex flex-col gap-4 border border-line bg-surface p-6" onSubmit={handleSubmit}>
-      <h2 className="text-xl">{initialProduct ? 'Edit product' : 'New product'}</h2>
+    <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
+      <div className="flex flex-col gap-2">
+        <FieldLabel htmlFor="image">Photo</FieldLabel>
+        <ImageUploader
+          value={imageUrl}
+          alt={title || 'Product'}
+          isUploading={isUploading}
+          onUpload={onUpload}
+          onChange={setImageUrl}
+        />
+      </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm text-ink-soft" htmlFor="title">
-          Title
-        </label>
+        <FieldLabel htmlFor="title">Title</FieldLabel>
         <Input id="title" required value={title} onChange={(e) => setTitle(e.target.value)} />
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm text-ink-soft" htmlFor="description">
-          Description
-        </label>
-        <textarea
+        <FieldLabel htmlFor="description">Description</FieldLabel>
+        <Textarea
           id="description"
           required
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          className="w-full border border-line bg-surface px-3 py-2 text-base text-ink focus:border-accent focus:outline-none"
         />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <label className="text-sm text-ink-soft" htmlFor="price">
-            Price
-          </label>
+          <FieldLabel htmlFor="price">Price</FieldLabel>
           <Input
             id="price"
             type="number"
@@ -93,9 +107,7 @@ export function ProductForm({ initialProduct, isSubmitting, onSubmit, onCancel }
         </div>
 
         <div className="flex flex-col gap-2">
-          <label className="text-sm text-ink-soft" htmlFor="stock">
-            Stock
-          </label>
+          <FieldLabel htmlFor="stock">Stock</FieldLabel>
           <Input
             id="stock"
             type="number"
@@ -108,26 +120,24 @@ export function ProductForm({ initialProduct, isSubmitting, onSubmit, onCancel }
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-sm text-ink-soft" htmlFor="variants">
-          Variants
-        </label>
-        <textarea
+        <FieldLabel htmlFor="variants">Variants</FieldLabel>
+        <Textarea
           id="variants"
           rows={3}
           placeholder={'Size: S, M, L\nColor: Black, White'}
           value={variantsText}
           onChange={(e) => setVariantsText(e.target.value)}
-          className="w-full border border-line bg-surface px-3 py-2 font-mono text-sm text-ink focus:border-accent focus:outline-none"
+          className="font-mono text-sm"
         />
-        <p className="text-xs text-ink-muted">One group per line, as “Name: option, option”.</p>
+        <p className="text-xs text-ink-muted">One group per line, as "Name: option, option".</p>
       </div>
 
-      <div className="flex gap-3">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving…' : 'Save product'}
-        </Button>
+      <div className="-mx-6 mt-2 flex justify-end gap-3 border-t-2 border-ink px-6 pt-4">
         <Button type="button" variant="ghost" onClick={onCancel}>
           Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting || isUploading}>
+          {isSubmitting ? 'Saving…' : 'Save product'}
         </Button>
       </div>
     </form>

@@ -18,10 +18,12 @@ export function useProducts() {
 
   const createProduct = useMutation({ mutationFn: productsApi.create, onSuccess: invalidate });
   const updateProduct = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: Partial<ProductInput> }) => productsApi.update(id, input),
+    mutationFn: ({ id, input, expectedVersion }: { id: string; input: Partial<ProductInput>; expectedVersion: number }) =>
+      productsApi.update(id, input, expectedVersion),
     onSuccess: invalidate,
   });
   const deleteProduct = useMutation({ mutationFn: productsApi.remove, onSuccess: invalidate });
+  const uploadImage = useMutation({ mutationFn: productsApi.uploadImage });
 
   return {
     products: query.data,
@@ -31,5 +33,6 @@ export function useProducts() {
     createProduct,
     updateProduct,
     deleteProduct,
+    uploadImage,
   };
 }

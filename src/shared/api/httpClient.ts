@@ -75,6 +75,36 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
 }
 
+/** Multipart uploads skip the JSON `Content-Type` and body-stringify path `apiRequest` takes. */
+export async function apiUpload<T>(
+  path: string,
+  file: File,
+  skipRefresh = false,
+): Promise<T> {
+  const token = tokenStore.get();
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+
+  if (response.status === 401 && !skipRefresh) {
+    const refreshed = await refreshAccessToken();
+    if (refreshed) return apiUpload<T>(path, file, true);
+  }
+
+  if (!response.ok) {
+    const message = await extractErrorMessage(response);
+    throw new ApiError(response.status, message);
+  }
+
+  return (await response.json()) as T;
+}
+
 async function extractErrorMessage(response: Response): Promise<string> {
   try {
     const data = (await response.json()) as { message?: string | string[] };
