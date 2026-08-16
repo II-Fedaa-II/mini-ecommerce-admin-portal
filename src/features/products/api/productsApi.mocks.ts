@@ -26,7 +26,15 @@ export const mockProducts: Product[] = [
 ];
 
 export const productHandlers = [
-  http.get(`${API_URL}/products`, () => HttpResponse.json(mockProducts)),
+  http.get(`${API_URL}/products`, () =>
+    HttpResponse.json({
+      items: mockProducts,
+      total: mockProducts.length,
+      page: 1,
+      limit: mockProducts.length,
+      totalPages: 1,
+    }),
+  ),
   http.post(`${API_URL}/products`, async ({ request }) => {
     const body = (await request.json()) as Omit<Product, 'id' | 'version'>;
     return HttpResponse.json({ ...body, id: 'product-new', version: 1 }, { status: 201 });

@@ -1,18 +1,25 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { productsApi } from '../api/productsApi';
-import type { ProductInput } from '../types';
+import type { ProductInput, ProductListQuery } from '../types';
 
 export const productKeys = {
   all: ['products'] as const,
+  list: (query: ProductListQuery) => ['products', 'list', query] as const,
   detail: (id: string) => ['products', id] as const,
 };
 
-export function useProducts() {
+export function useProducts(query: ProductListQuery = {}) {
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
 
-  const query = useQuery({ queryKey: productKeys.all, queryFn: productsApi.list, enabled: isAuthenticated });
+  const productsQuery = useQuery({
+    queryKey: productKeys.list(query),
+    queryFn: () => productsApi.list(query),
+    enabled: isAuthenticated,
+    // Keeps the current page's rows on screen while the next page/filter loads.
+    placeholderData: keepPreviousData,
+  });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: productKeys.all });
 
@@ -26,10 +33,11 @@ export function useProducts() {
   const uploadImage = useMutation({ mutationFn: productsApi.uploadImage });
 
   return {
-    products: query.data,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    refetch: query.refetch,
+    data: productsQuery.data,
+    isLoading: productsQuery.isLoading,
+    isError: productsQuery.isError,
+    isPlaceholderData: productsQuery.isPlaceholderData,
+    refetch: productsQuery.refetch,
     createProduct,
     updateProduct,
     deleteProduct,

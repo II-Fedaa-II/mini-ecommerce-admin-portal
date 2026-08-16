@@ -26,11 +26,10 @@ async function resetFixtures(request: APIRequestContext): Promise<void> {
     await request.delete(`${API_URL}/roles/${role.id}`, { headers });
   }
 
-  const products = (await (await request.get(`${API_URL}/products`, { headers })).json()) as {
-    id: string;
-    title: string;
-  }[];
-  for (const product of products.filter((entry) => entry.title === PRODUCT_TITLE)) {
+  const productsPage = (await (
+    await request.get(`${API_URL}/products`, { headers, params: { search: PRODUCT_TITLE } })
+  ).json()) as { items: { id: string; title: string }[] };
+  for (const product of productsPage.items.filter((entry) => entry.title === PRODUCT_TITLE)) {
     await request.delete(`${API_URL}/products/${product.id}`, { headers });
   }
 }
@@ -48,14 +47,16 @@ test('admin golden path: sign in, manage a product, then create and assign a rol
 
   await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
 
-  // Create a product.
+  // Create a product. Scoped to the dialog — the page's own filter bar also has a
+  // "Price" range field, and an unscoped getByLabel('Price') matches both.
   await page.getByRole('button', { name: 'New product' }).click();
-  await page.getByLabel('Title').fill(PRODUCT_TITLE);
-  await page.getByLabel('Description').fill('Created by the admin e2e test.');
-  await page.getByLabel('Price').fill('42.5');
-  await page.getByLabel('Stock').fill('7');
-  await page.getByLabel('Variants').fill('Size: S, M, L');
-  await page.getByRole('button', { name: 'Save product' }).click();
+  const createDialog = page.getByRole('dialog');
+  await createDialog.getByLabel('Title').fill(PRODUCT_TITLE);
+  await createDialog.getByLabel('Description').fill('Created by the admin e2e test.');
+  await createDialog.getByLabel('Price', { exact: true }).fill('42.5');
+  await createDialog.getByLabel('Stock').fill('7');
+  await createDialog.getByLabel('Variants').fill('Size: S, M, L');
+  await createDialog.getByRole('button', { name: 'Save product' }).click();
 
   const productRow = page.getByRole('row', { name: new RegExp(PRODUCT_TITLE) });
   await expect(productRow).toBeVisible();
@@ -63,8 +64,9 @@ test('admin golden path: sign in, manage a product, then create and assign a rol
 
   // Edit it.
   await productRow.getByRole('button', { name: 'Edit' }).click();
-  await page.getByLabel('Stock').fill('9');
-  await page.getByRole('button', { name: 'Save product' }).click();
+  const editDialog = page.getByRole('dialog');
+  await editDialog.getByLabel('Stock').fill('9');
+  await editDialog.getByRole('button', { name: 'Save product' }).click();
   await expect(page.getByRole('row', { name: new RegExp(PRODUCT_TITLE) })).toContainText('9');
 
   // Create a limited role.
