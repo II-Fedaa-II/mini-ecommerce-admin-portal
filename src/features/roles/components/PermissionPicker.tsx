@@ -28,9 +28,9 @@ export function PermissionPicker({ available, selected, disabled, onChange }: Pe
             aria-pressed={isActive}
             onClick={() => toggle(permission)}
             className={cn(
-              'border px-3 py-1.5 font-mono text-xs transition-colors',
+              'border-2 px-3 py-1.5 font-mono text-xs transition-colors',
               isActive
-                ? 'border-ink bg-ink text-white'
+                ? 'border-ink bg-accent text-white'
                 : 'border-line bg-surface text-ink-soft hover:border-ink-muted hover:text-ink',
               disabled && 'cursor-not-allowed opacity-50',
             )}

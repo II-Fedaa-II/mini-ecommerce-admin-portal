@@ -71,6 +71,7 @@ test('admin golden path: sign in, manage a product, then create and assign a rol
   await page.getByRole('link', { name: 'Roles' }).click();
   await expect(page.getByRole('heading', { name: 'Roles' })).toBeVisible();
 
+  await page.getByRole('button', { name: 'New role' }).click();
   await page.getByLabel('Name').fill(ROLE_NAME);
   await page
     .locator('form')
